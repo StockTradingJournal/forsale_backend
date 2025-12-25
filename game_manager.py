@@ -117,8 +117,10 @@ class GameManager:
 
     async def _start_phase1(self, room: Room):
         room.phase = GamePhase.PHASE1_BIDDING
-        room.turn_order = list(room.players.keys())
-        random.shuffle(room.turn_order)
+        # Only shuffle turn order if not already set (first round)
+        if not room.turn_order:
+            room.turn_order = list(room.players.keys())
+            random.shuffle(room.turn_order)
         room.current_turn_index = 0
         
         # Deal properties equal to number of players
