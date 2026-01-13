@@ -172,8 +172,7 @@ async def leave_room(sid, data):
         await game_manager.handle_disconnect(sid, sio)
     except Exception as e:
         await sio.emit('room:error', {'code': 'LEAVE_FAILED', 'message': str(e)}, room=sid)
-<<<<<<< Updated upstream
-
+        
 @sio.event
 async def play_card(sid, data):
     try:
@@ -187,8 +186,6 @@ async def play_card(sid, data):
             await game_manager.broadcast_state(room_id, sio)
     except Exception as e:
         await sio.emit('room:error', {'code': 'PLAY_FAILED', 'message': str(e)}, room=sid)
-=======
->>>>>>> Stashed changes
 
 @sio.event
 async def chat_message(sid, data):
