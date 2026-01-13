@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from game_manager import GameManager
 import uvicorn
+import os
 
 # Create Socket.IO server
 sio = socketio.AsyncServer(
@@ -217,5 +218,9 @@ async def chat_message(sid, data):
     except Exception as e:
         print(f"Chat message error: {e}")
 
+# For Vercel deployment
+app = socket_app
+
 if __name__ == "__main__":
-    uvicorn.run(socket_app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(socket_app, host="0.0.0.0", port=port)
