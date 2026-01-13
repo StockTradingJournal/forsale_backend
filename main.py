@@ -125,6 +125,42 @@ async def pass_turn(sid, data):
         await sio.emit('room:error', {'code': 'PASS_FAILED', 'message': str(e)}, room=sid)
 
 @sio.event
+async def chat_message(sid, data):
+    try:
+        message = data.get('message')
+        if not message:
+            return
+        
+        # 플레이어가 속한 방 찾기
+        room_id = game_manager.player_to_room.get(sid)
+        if not room_id:
+            return
+        
+        # 플레이어 정보 가져오기
+        room = game_manager.rooms.get(room_id)
+        if not room:
+            return
+        
+        player = room.players.get(sid)
+        if not player:
+            return
+        
+        # 채팅 메시지를 방의 모든 플레이어에게 브로드캐스트
+        import time
+        chat_data = {
+            'playerId': sid,
+            'nickname': player.nickname,
+            'message': message,
+            'timestamp': int(time.time() * 1000)
+        }
+        
+        print(f"Broadcasting chat message from {player.nickname}: {message}")
+        await sio.emit('chat:message', chat_data, room=room_id)
+    except Exception as e:
+        print(f"Chat message error: {e}")
+        await sio.emit('room:error', {'code': 'CHAT_FAILED', 'message': str(e)}, room=sid)
+
+@sio.event
 async def leave_room(sid, data):
     try:
         # 소켓 룸에서 먼저 제거
@@ -135,6 +171,7 @@ async def leave_room(sid, data):
         await game_manager.handle_disconnect(sid, sio)
     except Exception as e:
         await sio.emit('room:error', {'code': 'LEAVE_FAILED', 'message': str(e)}, room=sid)
+<<<<<<< Updated upstream
 
 @sio.event
 async def play_card(sid, data):
@@ -149,6 +186,8 @@ async def play_card(sid, data):
             await game_manager.broadcast_state(room_id, sio)
     except Exception as e:
         await sio.emit('room:error', {'code': 'PLAY_FAILED', 'message': str(e)}, room=sid)
+=======
+>>>>>>> Stashed changes
 
 @sio.event
 async def chat_message(sid, data):

@@ -30,6 +30,6 @@ echo   start.bat
 echo.
 echo 또는 수동으로 실행하려면:
 echo   venv\Scripts\activate.bat
-echo   uvicorn main:app --reload --host 0.0.0.0 --port 8000
+echo   uvicorn main:socket_app --reload --host 0.0.0.0 --port 8000
 
 pause

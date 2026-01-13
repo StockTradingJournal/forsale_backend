@@ -21,4 +21,4 @@ echo ""
 echo "서버를 중지하려면 Ctrl+C를 누르세요."
 echo ""
 
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:socket_app --reload --host 0.0.0.0 --port 8000

@@ -40,7 +40,7 @@ pip install -r requirements.txt
 서버 실행:
 ```bash
 source venv/bin/activate  # Windows: venv\Scripts\activate.bat
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:socket_app --reload --host 0.0.0.0 --port 8000
 ```
 
 ## 🌐 접속 정보
