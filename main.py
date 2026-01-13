@@ -24,6 +24,7 @@ app.add_middleware(
 
 # Create game manager
 game_manager = GameManager()
+game_manager.set_sio(sio)
 
 # Combine FastAPI and Socket.IO
 socket_app = socketio.ASGIApp(sio, app)
@@ -134,9 +135,12 @@ async def leave_room(sid, data):
         await game_manager.handle_disconnect(sid, sio)
     except Exception as e:
         await sio.emit('room:error', {'code': 'LEAVE_FAILED', 'message': str(e)}, room=sid)
+
+@sio.event
+async def play_card(sid, data):
     try:
-        card_id = data.get('cardId')
-        if not card_id:
+        card_id = data.get('card_id')
+        if card_id is None:
             await sio.emit('room:error', {'code': 'INVALID_CARD', 'message': 'Card ID required'}, room=sid)
             return
         
@@ -147,17 +151,32 @@ async def leave_room(sid, data):
         await sio.emit('room:error', {'code': 'PLAY_FAILED', 'message': str(e)}, room=sid)
 
 @sio.event
-async def play_card(sid, data):
+async def chat_message(sid, data):
     try:
-        card_id = data.get('cardId')
-        if not card_id:
-            await sio.emit('room:error', {'code': 'INVALID_CARD', 'message': 'Card ID required'}, room=sid)
+        message = data.get('message')
+        if not message:
             return
         
-        room_id = await game_manager.handle_play_card(sid, card_id)
-        if room_id:
-            await game_manager.broadcast_state(room_id, sio)
+        room_id = game_manager.player_to_room.get(sid)
+        if not room_id or room_id not in game_manager.rooms:
+            return
+        
+        room = game_manager.rooms[room_id]
+        player = room.players.get(sid)
+        if not player:
+            return
+        
+        # Broadcast chat message to all players in room
+        import time
+        chat_data = {
+            'playerId': sid,
+            'nickname': player.nickname,
+            'message': message,
+            'timestamp': int(time.time() * 1000)
+        }
+        await sio.emit('chat:message', chat_data, room=room_id)
     except Exception as e:
-        await sio.emit('room:error', {'code': 'PLAY_FAILED', 'message': str(e)}, room=sid)
+        print(f"Chat message error: {e}")
+
 if __name__ == "__main__":
     uvicorn.run(socket_app, host="0.0.0.0", port=8000)
